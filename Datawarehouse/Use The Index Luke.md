@@ -8,4 +8,4 @@
 
 
 
-markdown [editor] (https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf)
+markdown [editor](https://enterprise.github.com/downloads/en/markdown-cheatsheet.pdf)
