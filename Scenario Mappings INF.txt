@@ -1,0 +1,86 @@
+Incremental Load for Order Table:
+(
+	Order_ID int,
+	Order_Date int,
+	Order_num varchar,
+	unit_id varchar,
+	ordersysname varchar
+	updated_date datetime
+)
+Incremental Load:
+											Source Analyser (Flat File) 
+														||
+											Expression Transformation (for all Columns) (Query override)
+											Variable:Look up on  Order table for updated_date (Pull the max updated_date)
+														||
+											Look up Transformation to see if the record is present or not
+														||
+											Update Strategy with if (ISNULL(Lookup value),DD_INSERT,DD_UPDATE)
+							____________________________||______________________________________________________
+							||																				  ||
+					If value found then DD_UPDATE														IF no value found then DD_INSERT
+					updatestrategy Transformation 														updatestrategy Transformation 
+					to update record																	to update record
+					
+
+SCD Type 2 Load:
+Source:
+for Dept Dimension:
+(
+	Dept_ID int,
+	Dept_Name VARCHAR(100),
+	Dept_Location VARCHAR(100),
+	Dept_Store_Ind VARCHAR(100),
+)
+Target:
+for Dept Dimension:
+(
+	Dept_Surr_Key Int,
+	Dept_ID int,
+	Dept_Name VARCHAR(100),
+	Dept_Location VARCHAR(100),
+	Dept_Storage_Ind VARCHAR(100),
+	Effective_from DATE,
+	Effective_to DATE,
+	Is_Active Varchar(3)
+)
+											Source Analyser (Flat File) 
+														||
+											Expression Transformation (for all Columns) 
+														||
+											Lookup Transformation on Dept_ID at Target Table
+											- Define Fullhash for the Dept Found with all column possible to be updated
+														||
+											Expression Transformation (for all Columns) 
+											- Connect Product Id and Existing record's Full hash from Look up Transformation
+											- Connect rest of the fields from Expression Trasnformation coming from source.
+											- Compare the new full hash and existing full hash
+											- Generate a field to get if it is insert or update or ignore
+											- Generate Effective_from (todays date) and Effective_to (NULL) columns
+														||
+											Router trasnformation on basis of Which type of operation to be performed
+							_______________________________________________||______________________________________________________
+							||												||													  ||			
+						Insert											UPDATE													IGNORE
+					Seq Generator transformation 				Expression Transformation 
+					for Surr key								To Generate Is_Active 'n'
+							||												||
+					Insert a New record							Update Strategy to update
+					With Is_Active 'y'							Table wilth above value    
+																			||				
+																Insert row for dimension update
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
+											
